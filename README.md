@@ -762,6 +762,28 @@ Yep. By default, Heya sends campaigns ain order of `priority`. Use the
 
 </details>
 
+## Advanced queries
+
+Retrieve all campaigns a user is currently subscribed to:
+
+```ruby
+Heya::CampaignMembership.where(user: User.last)
+```
+
+The campaigns will be indicated in the `campaign_id` column. It's a GlobalID string. If you want to instanciate them:
+
+```ruby
+# Heya already includes the GlobalID gem
+Heya::CampaignMembership.where(user: user).map {|membership| GlobalID::Locator.locate(membership.campaign_gid) }
+```
+
+Lastly, if you want all the users subscribed to a campaign (for instance, your `OnboardingCampaign`):
+
+```ruby
+# Assuming a default `config.user_type` of `User`, update accordingly
+User.where(id: Heya::CampaignMembership.where(campaign_gid: OnboardingCampaign.gid).select("user_id")).distinct
+```
+
 ## Upgrading Heya
 
 Heya adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html), and
