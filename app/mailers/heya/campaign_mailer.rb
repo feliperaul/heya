@@ -30,6 +30,7 @@ module Heya
 
       headers_params = step.params.fetch("headers", nil)
       headers(headers_params) if headers_params
+      instance_exec(user, &step.params["before"]) if step.params["before"]
 
       mail(
         from: from,
@@ -40,6 +41,9 @@ module Heya
         template_path: "heya/campaign_mailer/#{campaign_name}",
         template_name: step_name
       )
+
+      instance_exec(user, &step.params["after"]) if step.params["after"]
+
     end
 
     protected

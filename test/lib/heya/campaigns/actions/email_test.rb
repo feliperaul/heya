@@ -88,6 +88,29 @@ module Heya
             assert_kind_of Step, create_test_step(action: Email)
           end
         end
+
+        test "it runs the before and after email callbacks" do
+
+          foo = OpenStruct.new
+
+          contact = contacts(:one)
+          step = create_test_step(
+            action: Email,
+            subject: "subject",
+            before: -> (user) { @user_email = user.email },
+            after: -> (user) { foo.user_email = user.email }
+          )
+          email = Email.new(user: contact, step: step).build
+
+          assert_emails 1 do
+            email.deliver
+          end
+
+          assert email.html_part.body.decoded.include?("one@example.com")
+
+          assert_equal foo.user_email, "one@example.com"
+          
+        end
       end
     end
   end
